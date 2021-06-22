@@ -16,7 +16,7 @@
  */
 package org.apache.lucene.util.automaton;
 
-  
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -130,7 +130,7 @@ public class CompiledAutomaton {
    *  possibly expensive operations to determine if the automaton is one
    *  the cases in {@link CompiledAutomaton.AUTOMATON_TYPE}. */
   public CompiledAutomaton(Automaton automaton, Boolean finite, boolean simplify) {
-    this(automaton, finite, simplify, Operations.DEFAULT_MAX_DETERMINIZED_STATES, false);
+    this(automaton, finite, simplify, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT, false);
   }
 
 
@@ -138,12 +138,12 @@ public class CompiledAutomaton {
    *  to determine whether it is finite.  If simplify is true, we run
    *  possibly expensive operations to determine if the automaton is one
    *  the cases in {@link CompiledAutomaton.AUTOMATON_TYPE}. If simplify
-   *  requires determinizing the autaomaton then only maxDeterminizedStates
-   *  will be created.  Any more than that will cause a
+   *  requires determinizing the autaomaton then at most determinizeWorkLimit
+   *  effort will be spent.  Any more than that will cause a
    *  TooComplexToDeterminizeException.
    */
   public CompiledAutomaton(Automaton automaton, Boolean finite, boolean simplify,
-                           int maxDeterminizedStates, boolean isBinary) {
+                           int determinizeWorkLimit, boolean isBinary) {
     if (automaton.getNumStates() == 0) {
       automaton = new Automaton();
       automaton.createState();
@@ -188,7 +188,7 @@ public class CompiledAutomaton {
         return;
       }
 
-      automaton = Operations.determinize(automaton, maxDeterminizedStates);
+      automaton = Operations.determinize(automaton, determinizeWorkLimit);
 
       IntsRef singleton = Operations.getSingleton(automaton);
 
@@ -230,12 +230,12 @@ public class CompiledAutomaton {
       binary = new UTF32ToUTF8().convert(automaton);
     }
 
-    if (this.finite) {
+    // compute a common suffix for infinite DFAs, this is an optimization for "leading wildcard"
+    // so don't burn cycles on it if the DFA is finite, or largeish
+    if (this.finite || automaton.getNumStates() + automaton.getNumTransitions() > 1000) {
       commonSuffixRef = null;
     } else {
-      // NOTE: this is a very costly operation!  We should test if it's really warranted in practice... we could do a fast match
-      // by looking for a sink state (which means it has no common suffix).  Or maybe we shouldn't do it when simplify is false?:
-      BytesRef suffix = Operations.getCommonSuffixBytesRef(binary, maxDeterminizedStates);
+      BytesRef suffix = Operations.getCommonSuffixBytesRef(binary);
       if (suffix.length == 0) {
         commonSuffixRef = null;
       } else {
@@ -244,7 +244,7 @@ public class CompiledAutomaton {
     }
 
     // This will determinize the binary automaton for us:
-    runAutomaton = new ByteRunAutomaton(binary, true, maxDeterminizedStates);
+    runAutomaton = new ByteRunAutomaton(binary, true, determinizeWorkLimit);
 
     this.automaton = runAutomaton.automaton;
 

@@ -32,8 +32,9 @@ import org.apache.lucene.util.automaton.Automaton;
 import org.apache.lucene.util.automaton.AutomatonProvider;
 import org.apache.lucene.util.automaton.Operations;
 import org.apache.lucene.util.automaton.RegExp;
+import org.apache.lucene.util.automaton.TooComplexToDeterminizeException;
 
-import static org.apache.lucene.util.automaton.Operations.DEFAULT_MAX_DETERMINIZED_STATES;
+import static org.apache.lucene.util.automaton.Operations.DEFAULT_DETERMINIZE_WORK_LIMIT;
 
 /**
  * Some simple regex tests, mostly converted from contrib's TestRegexQuery.
@@ -89,7 +90,7 @@ public class TestRegexpQuery extends LuceneTestCase {
     assertEquals(1, regexQueryNrHits("<420000-600000>"));
     assertEquals(0, regexQueryNrHits("<493433-600000>"));
   }
-  
+
   public void testRegexComplement() throws IOException {
     assertEquals(1, regexQueryNrHits("4934~[3]"));
     // not the empty lang, i.e. match all docs
@@ -111,7 +112,7 @@ public class TestRegexpQuery extends LuceneTestCase {
       }
     };
     RegexpQuery query = new RegexpQuery(newTerm("<quickBrown>"), RegExp.ALL,
-      myProvider, DEFAULT_MAX_DETERMINIZED_STATES);
+      myProvider, DEFAULT_DETERMINIZE_WORK_LIMIT);
     assertEquals(1, searcher.search(query, 5).totalHits);
   }
   
@@ -123,5 +124,15 @@ public class TestRegexpQuery extends LuceneTestCase {
    */
   public void testBacktracking() throws IOException {
     assertEquals(1, regexQueryNrHits("4934[314]"));
+  }
+
+  /** Test worst-case for getCommonSuffix optimization */
+  public void testSlowCommonSuffix() throws Exception {
+    try {
+      new RegexpQuery( new Term( "stringvalue", "(.*a){2000}" ) );
+      fail("Expected " + TooComplexToDeterminizeException.class);
+    }
+    catch(TooComplexToDeterminizeException expected) {
+    }
   }
 }

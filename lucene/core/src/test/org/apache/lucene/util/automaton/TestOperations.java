@@ -23,7 +23,7 @@ import org.apache.lucene.util.*;
 
 import com.carrotsearch.randomizedtesting.generators.RandomInts;
 
-import static org.apache.lucene.util.automaton.Operations.DEFAULT_MAX_DETERMINIZED_STATES;
+import static org.apache.lucene.util.automaton.Operations.DEFAULT_DETERMINIZE_WORK_LIMIT;
 
 public class TestOperations extends LuceneTestCase {
   /** Test string union. */
@@ -53,7 +53,7 @@ public class TestOperations extends LuceneTestCase {
       eachIndividual[i++] = Automata.makeString(bref.utf8ToString());
     }
     return Operations.determinize(Operations.union(Arrays.asList(eachIndividual)),
-      DEFAULT_MAX_DETERMINIZED_STATES);
+      DEFAULT_DETERMINIZE_WORK_LIMIT);
   }
 
   /** Test concatenation with empty language returns empty */
@@ -88,7 +88,7 @@ public class TestOperations extends LuceneTestCase {
 
       final RegExp re = new RegExp(AutomatonTestUtil.randomRegexp(random()), RegExp.NONE);
       //System.out.println("TEST i=" + i + " re=" + re);
-      final Automaton a = Operations.determinize(re.toAutomaton(), DEFAULT_MAX_DETERMINIZED_STATES);
+      final Automaton a = Operations.determinize(re.toAutomaton(), DEFAULT_DETERMINIZE_WORK_LIMIT);
       assertFalse(Operations.isEmpty(a));
 
       final AutomatonTestUtil.RandomAcceptedStrings rx = new AutomatonTestUtil.RandomAcceptedStrings(a);

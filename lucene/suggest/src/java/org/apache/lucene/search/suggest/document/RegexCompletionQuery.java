@@ -46,7 +46,7 @@ import org.apache.lucene.util.automaton.RegExp;
 public class RegexCompletionQuery extends CompletionQuery {
 
   private final int flags;
-  private final int maxDeterminizedStates;
+  private final int determinizeWorkLimit;
 
   /**
    * Calls {@link RegexCompletionQuery#RegexCompletionQuery(Term, BitsProducer)}
@@ -59,17 +59,18 @@ public class RegexCompletionQuery extends CompletionQuery {
   /**
    * Calls {@link RegexCompletionQuery#RegexCompletionQuery(Term, int, int, BitsProducer)}
    * enabling all optional regex syntax and <code>maxDeterminizedStates</code> of
-   * {@value org.apache.lucene.util.automaton.Operations#DEFAULT_MAX_DETERMINIZED_STATES}
+   * {@value org.apache.lucene.util.automaton.Operations#DEFAULT_DETERMINIZE_WORK_LIMIT}
    */
   public RegexCompletionQuery(Term term, BitsProducer filter) {
-    this(term, RegExp.ALL, Operations.DEFAULT_MAX_DETERMINIZED_STATES, filter);
+    this(term, RegExp.ALL, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT, filter);
   }
   /**
-   * Calls {@link RegexCompletionQuery#RegexCompletionQuery(Term, int, int, BitsProducer)}
-   * with no filter
+   * Calls {@link RegexCompletionQuery#RegexCompletionQuery(Term, int, int, BitsProducer)} enabling
+   * all optional regex syntax and <code>determinizeWorkLimit</code> of {@value
+   * Operations#DEFAULT_DETERMINIZE_WORK_LIMIT}
    */
-  public RegexCompletionQuery(Term term, int flags, int maxDeterminizedStates) {
-    this(term, flags, maxDeterminizedStates, null);
+  public RegexCompletionQuery(Term term, int flags, int determinizeWorkLimit) {
+    this(term, flags, determinizeWorkLimit, null);
   }
 
   /**
@@ -78,17 +79,17 @@ public class RegexCompletionQuery extends CompletionQuery {
    * @param term query is run against {@link Term#field()} and {@link Term#text()}
    *             is interpreted as a regular expression
    * @param flags used as syntax_flag in {@link RegExp#RegExp(String, int)}
-   * @param maxDeterminizedStates used in {@link RegExp#toAutomaton(int)}
+   * @param determinizeWorkLimit used in {@link RegExp#toAutomaton(int)}
    * @param filter used to query on a sub set of documents
    */
-  public RegexCompletionQuery(Term term, int flags, int maxDeterminizedStates, BitsProducer filter) {
+  public RegexCompletionQuery(Term term, int flags, int determinizeWorkLimit, BitsProducer filter) {
     super(term, filter);
     this.flags = flags;
-    this.maxDeterminizedStates = maxDeterminizedStates;
+    this.determinizeWorkLimit = determinizeWorkLimit;
   }
 
   @Override
   public Weight createWeight(IndexSearcher searcher, boolean needsScores) throws IOException {
-    return new CompletionWeight(this, new RegExp(getTerm().text(), flags).toAutomaton(maxDeterminizedStates));
+    return new CompletionWeight(this, new RegExp(getTerm().text(), flags).toAutomaton(determinizeWorkLimit));
   }
 }

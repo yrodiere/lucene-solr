@@ -51,7 +51,7 @@ public final class CompletionAnalyzer extends AnalyzerWrapper {
    */
   final static int HOLE_CHARACTER = TokenStreamToAutomaton.HOLE;
 
-  final static int DEFAULT_MAX_GRAPH_EXPANSIONS = Operations.DEFAULT_MAX_DETERMINIZED_STATES;
+  final static int DEFAULT_MAX_GRAPH_EXPANSIONS = Operations.DEFAULT_DETERMINIZE_WORK_LIMIT;
   final static boolean DEFAULT_PRESERVE_SEP = true;
   final static boolean DEFAULT_PRESERVE_POSITION_INCREMENTS = true;
 

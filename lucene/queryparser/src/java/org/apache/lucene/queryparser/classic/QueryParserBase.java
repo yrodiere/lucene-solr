@@ -35,13 +35,13 @@ import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.QueryBuilder;
 import org.apache.lucene.util.automaton.RegExp;
 
-import static org.apache.lucene.util.automaton.Operations.DEFAULT_MAX_DETERMINIZED_STATES;
+import static org.apache.lucene.util.automaton.Operations.DEFAULT_DETERMINIZE_WORK_LIMIT;
 
 /** This class is overridden by QueryParser in QueryParser.jj
  * and acts to separate the majority of the Java code from the .jj grammar file. 
  */
 public abstract class QueryParserBase extends QueryBuilder implements CommonQueryParserConfiguration {
-  
+
   /** Do not catch this exception in your code, it means you are using methods that you should no longer use. */
   public static class MethodRemovedUseAnother extends Throwable {}
 
@@ -84,7 +84,7 @@ public abstract class QueryParserBase extends QueryBuilder implements CommonQuer
   boolean analyzeRangeTerms = false;
 
   boolean autoGeneratePhraseQueries;
-  int maxDeterminizedStates = DEFAULT_MAX_DETERMINIZED_STATES;
+  int determinizeWorkLimit = DEFAULT_DETERMINIZE_WORK_LIMIT;
 
   // So the generated QueryParser(CharStream) won't error out
   protected QueryParserBase() {
@@ -380,9 +380,9 @@ public abstract class QueryParserBase extends QueryBuilder implements CommonQuer
 
   /**
    * Set whether or not to analyze range terms when constructing {@link TermRangeQuery}s.
-   * For example, setting this to true can enable analyzing terms into 
+   * For example, setting this to true can enable analyzing terms into
    * collation keys for locale-sensitive {@link TermRangeQuery}.
-   * 
+   *
    * @param analyzeRangeTerms whether or not terms should be analyzed for RangeQuerys
    */
   public void setAnalyzeRangeTerms(boolean analyzeRangeTerms) {
@@ -397,21 +397,19 @@ public abstract class QueryParserBase extends QueryBuilder implements CommonQuer
   }
 
   /**
-   * @param maxDeterminizedStates the maximum number of states that
-   *   determinizing a regexp query can result in.  If the query results in any
-   *   more states a TooComplexToDeterminizeException is thrown.
+   * @param determinizeWorkLimit the maximum effort that determinizing a regexp query can spend. If
+   *     the query requires more effort, a TooComplexToDeterminizeException is thrown.
    */
-  public void setMaxDeterminizedStates(int maxDeterminizedStates) {
-    this.maxDeterminizedStates = maxDeterminizedStates;
+  public void setDeterminizeWorkLimit(int determinizeWorkLimit) {
+    this.determinizeWorkLimit = determinizeWorkLimit;
   }
 
   /**
-   * @return the maximum number of states that determinizing a regexp query
-   *   can result in.  If the query results in any more states a
-   *   TooComplexToDeterminizeException is thrown.
+   * @return the maximum effort that determinizing a regexp query can spend. If the query requires
+   *     more effort, a TooComplexToDeterminizeException is thrown.
    */
-  public int getMaxDeterminizedStates() {
-    return maxDeterminizedStates;
+  public int getDeterminizeWorkLimit() {
+    return determinizeWorkLimit;
   }
 
   protected void addClause(List<BooleanClause> clauses, int conj, int mods, Query q) {
@@ -578,7 +576,7 @@ public abstract class QueryParserBase extends QueryBuilder implements CommonQuer
    */
   protected Query newRegexpQuery(Term regexp) {
     RegexpQuery query = new RegexpQuery(regexp, RegExp.ALL,
-      maxDeterminizedStates);
+      determinizeWorkLimit);
     query.setRewriteMethod(multiTermRewriteMethod);
     return query;
   }
@@ -608,7 +606,7 @@ public abstract class QueryParserBase extends QueryBuilder implements CommonQuer
 
     try (TokenStream source = analyzerIn.tokenStream(field, part)) {
       source.reset();
-      
+
       TermToBytesRefAttribute termAtt = source.getAttribute(TermToBytesRefAttribute.class);
 
       if (!source.incrementToken())
@@ -668,7 +666,7 @@ public abstract class QueryParserBase extends QueryBuilder implements CommonQuer
    * @return new WildcardQuery instance
    */
   protected Query newWildcardQuery(Term t) {
-    WildcardQuery query = new WildcardQuery(t, maxDeterminizedStates);
+    WildcardQuery query = new WildcardQuery(t, determinizeWorkLimit);
     query.setRewriteMethod(multiTermRewriteMethod);
     return query;
   }

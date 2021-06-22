@@ -35,7 +35,7 @@ import org.apache.lucene.util.automaton.UTF32ToUTF8;
 import org.apache.lucene.util.fst.FST;
 import org.apache.lucene.util.fst.PairOutputs.Pair;
 
-import static org.apache.lucene.util.automaton.Operations.DEFAULT_MAX_DETERMINIZED_STATES;
+import static org.apache.lucene.util.automaton.Operations.DEFAULT_DETERMINIZE_WORK_LIMIT;
 
 /**
  * Implements a fuzzy {@link AnalyzingSuggester}. The similarity measurement is
@@ -205,7 +205,7 @@ public final class FuzzySuggester extends AnalyzingSuggester {
   protected Automaton convertAutomaton(Automaton a) {
     if (unicodeAware) {
       Automaton utf8automaton = new UTF32ToUTF8().convert(a);
-      utf8automaton = Operations.determinize(utf8automaton, DEFAULT_MAX_DETERMINIZED_STATES);
+      utf8automaton = Operations.determinize(utf8automaton, DEFAULT_DETERMINIZE_WORK_LIMIT);
       return utf8automaton;
     } else {
       return a;
@@ -250,7 +250,7 @@ public final class FuzzySuggester extends AnalyzingSuggester {
       Automaton a = Operations.union(subs);
       // TODO: we could call toLevenshteinAutomata() before det? 
       // this only happens if you have multiple paths anyway (e.g. synonyms)
-      return Operations.determinize(a, DEFAULT_MAX_DETERMINIZED_STATES);
+      return Operations.determinize(a, DEFAULT_DETERMINIZE_WORK_LIMIT);
     }
   }
 }

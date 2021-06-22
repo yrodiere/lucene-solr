@@ -32,7 +32,7 @@ import org.apache.lucene.util.automaton.Automata;
 import org.apache.lucene.util.automaton.Automaton;
 import org.apache.lucene.util.automaton.Operations;
 
-import static org.apache.lucene.util.automaton.Operations.DEFAULT_MAX_DETERMINIZED_STATES;
+import static org.apache.lucene.util.automaton.Operations.DEFAULT_DETERMINIZE_WORK_LIMIT;
 
 public class TestGraphTokenizers extends BaseTokenStreamTestCase {
 
@@ -582,7 +582,7 @@ public class TestGraphTokenizers extends BaseTokenStreamTestCase {
 
   private void assertSameLanguage(Automaton expected, Automaton actual) {
     assertTrue(Operations.sameLanguage(
-      Operations.determinize(Operations.removeDeadStates(expected), DEFAULT_MAX_DETERMINIZED_STATES),
-      Operations.determinize(Operations.removeDeadStates(actual), DEFAULT_MAX_DETERMINIZED_STATES)));
+      Operations.determinize(Operations.removeDeadStates(expected), DEFAULT_DETERMINIZE_WORK_LIMIT),
+      Operations.determinize(Operations.removeDeadStates(actual), DEFAULT_DETERMINIZE_WORK_LIMIT)));
   }
 }

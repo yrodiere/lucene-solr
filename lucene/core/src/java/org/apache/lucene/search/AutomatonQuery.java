@@ -62,7 +62,7 @@ public class AutomatonQuery extends MultiTermQuery {
    *        match.
    */
   public AutomatonQuery(final Term term, Automaton automaton) {
-    this(term, automaton, Operations.DEFAULT_MAX_DETERMINIZED_STATES);
+    this(term, automaton, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT);
   }
 
   /**
@@ -72,13 +72,12 @@ public class AutomatonQuery extends MultiTermQuery {
    *        term text is ignored.
    * @param automaton Automaton to run, terms that are accepted are considered a
    *        match.
-   * @param maxDeterminizedStates maximum number of states in the resulting
-   *   automata.  If the automata would need more than this many states
-   *   TooComplextToDeterminizeException is thrown.  Higher number require more
-   *   space but can process more complex automata.
+   * @param determinizeWorkLimit maximum effort to spend determinizing the automaton. If the
+   *        automaton would need more than this much effort, TooComplexToDeterminizeException is
+   *        thrown. Higher numbers require more space but can process more complex automata.
    */
-  public AutomatonQuery(final Term term, Automaton automaton, int maxDeterminizedStates) {
-    this(term, automaton, maxDeterminizedStates, false);
+  public AutomatonQuery(final Term term, Automaton automaton, int determinizeWorkLimit) {
+    this(term, automaton, determinizeWorkLimit, false);
   }
 
   /**
@@ -88,19 +87,18 @@ public class AutomatonQuery extends MultiTermQuery {
    *        term text is ignored.
    * @param automaton Automaton to run, terms that are accepted are considered a
    *        match.
-   * @param maxDeterminizedStates maximum number of states in the resulting
-   *   automata.  If the automata would need more than this many states
-   *   TooComplextToDeterminizeException is thrown.  Higher number require more
-   *   space but can process more complex automata.
+   * @param determinizeWorkLimit maximum effort to spend determinizing the automaton. If the
+   *        automaton will need more than this much effort, TooComplexToDeterminizeException is thrown.
+   *        Higher numbers require more space but can process more complex automata.
    * @param isBinary if true, this automaton is already binary and
    *   will not go through the UTF32ToUTF8 conversion
    */
-  public AutomatonQuery(final Term term, Automaton automaton, int maxDeterminizedStates, boolean isBinary) {
+  public AutomatonQuery(final Term term, Automaton automaton, int determinizeWorkLimit, boolean isBinary) {
     super(term.field());
     this.term = term;
     this.automaton = automaton;
     // TODO: we could take isFinite too, to save a bit of CPU in CompiledAutomaton ctor?:
-    this.compiled = new CompiledAutomaton(automaton, null, true, maxDeterminizedStates, isBinary);
+    this.compiled = new CompiledAutomaton(automaton, null, true, determinizeWorkLimit, isBinary);
   }
 
   @Override
@@ -151,7 +149,7 @@ public class AutomatonQuery extends MultiTermQuery {
     buffer.append(ToStringUtils.boost(getBoost()));
     return buffer.toString();
   }
-  
+
   /** Returns the automaton used to create this query */
   public Automaton getAutomaton() {
     return automaton;

@@ -3,6 +3,41 @@ Lucene Change Log
 For more information on past and future Lucene versions, please see:
 http://s.apache.org/luceneversions
 
+======================= Lucene 5.5.5-redhat2 =======================
+
+API Changes
+---------------------
+(No changes)
+
+New Features
+---------------------
+(No changes)
+
+Improvements
+---------------------
+* LUCENE-9981: Operations.getCommonSuffix/Prefix(Automaton) is now much more
+  efficient, from a worst case exponential down to quadratic cost in the
+  number of states + transitions in the Automaton.  These methods no longer
+  use the costly determinize method, removing the risk of
+  TooComplexToDeterminizeException (Robert Muir, Mike McCandless)
+
+* LUCENE-9981: Operations.determinize now throws TooComplexToDeterminizeException
+  based on too much "effort" spent determinizing rather than a precise state
+  count on the resulting returned automaton, to better handle adversarial
+  cases like det(rev(regexp("(.*a){2000}"))) that spend lots of effort but
+  result in smallish eventual returned automata.  (Robert Muir, Mike McCandless)
+
+Optimizations
+---------------------
+(No changes)
+
+Bug Fixes
+---------------------
+(No changes)
+
+Other
+---------------------
+
 ======================= Lucene 5.5.5 =======================
 
 Changes in Runtime Behavior
@@ -55,14 +90,14 @@ Other
 * LUCENE-6989: Backport MMapDirectory's unmapping code from Lucene 6.4 to use
   MethodHandles. This allows it to work with Java 9 (EA build 150 and later).
   (Uwe Schindler)
-  
+
 Build
 
 * LUCENE-7543: Make changes-to-html target an offline operation, by moving the
   Lucene and Solr DOAP RDF files into the Git source repository under
   dev-tools/doap/ and then pulling release dates from those files, rather than
   from JIRA. (Mano Kovacs, hossman, Steve Rowe)
-  
+
 * LUCENE-7596: Update Groovy to version 2.4.8 to allow building with Java 9
   build 148+. Also update JGit version for working-copy checks. This does not
   fix all issues with Java 9, but allows to build the distribution.

@@ -77,7 +77,7 @@ public class RegexpQuery extends AutomatonQuery {
    */
   public RegexpQuery(Term term, int flags) {
     this(term, flags, defaultProvider,
-      Operations.DEFAULT_MAX_DETERMINIZED_STATES);
+      Operations.DEFAULT_DETERMINIZE_WORK_LIMIT);
   }
 
   /**
@@ -85,12 +85,13 @@ public class RegexpQuery extends AutomatonQuery {
    * 
    * @param term regular expression.
    * @param flags optional RegExp features from {@link RegExp}
-   * @param maxDeterminizedStates maximum number of states that compiling the
-   *  automaton for the regexp can result in.  Set higher to allow more complex
-   *  queries and lower to prevent memory exhaustion.
+   * @param determinizeWorkLimit maximum effort to spend while compiling the automaton from this
+   *        regexp. Set higher to allow more complex queries and lower to prevent memory exhaustion.
+   *        Use {@link Operations#DEFAULT_DETERMINIZE_WORK_LIMIT} as a decent default if you don't
+   *        otherwise know what to specify.
    */
-  public RegexpQuery(Term term, int flags, int maxDeterminizedStates) {
-    this(term, flags, defaultProvider, maxDeterminizedStates);
+  public RegexpQuery(Term term, int flags, int determinizeWorkLimit) {
+    this(term, flags, defaultProvider, determinizeWorkLimit);
   }
 
   /**
@@ -99,17 +100,18 @@ public class RegexpQuery extends AutomatonQuery {
    * @param term regular expression.
    * @param flags optional RegExp features from {@link RegExp}
    * @param provider custom AutomatonProvider for named automata
-   * @param maxDeterminizedStates maximum number of states that compiling the
-   *  automaton for the regexp can result in.  Set higher to allow more complex
-   *  queries and lower to prevent memory exhaustion.
+   * @param determinizeWorkLimit maximum effort to spend while compiling the automaton from this
+   *        regexp. Set higher to allow more complex queries and lower to prevent memory exhaustion.
+   *        Use {@link Operations#DEFAULT_DETERMINIZE_WORK_LIMIT} as a decent default if you don't
+   *        otherwise know what to specify.
    */
   public RegexpQuery(Term term, int flags, AutomatonProvider provider,
-      int maxDeterminizedStates) {
+      int determinizeWorkLimit) {
     super(term,
           new RegExp(term.text(), flags).toAutomaton(
-                       provider, maxDeterminizedStates), maxDeterminizedStates);
+                       provider, determinizeWorkLimit), determinizeWorkLimit);
   }
-  
+
   /** Prints a user-readable version of this query. */
   @Override
   public String toString(String field) {

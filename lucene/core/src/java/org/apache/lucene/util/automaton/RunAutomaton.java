@@ -121,7 +121,7 @@ public abstract class RunAutomaton {
    * @param a an automaton
    */
   public RunAutomaton(Automaton a, int maxInterval, boolean tableize) {
-    this(a, maxInterval, tableize, Operations.DEFAULT_MAX_DETERMINIZED_STATES);
+    this(a, maxInterval, tableize, Operations.DEFAULT_DETERMINIZE_WORK_LIMIT);
   }
 
   /**
@@ -129,13 +129,12 @@ public abstract class RunAutomaton {
    * <code>Automaton</code>.
    * 
    * @param a an automaton
-   * @param maxDeterminizedStates maximum number of states that can be created
-   *   while determinizing a
+   * @param determinizeWorkLimit maximum effort to spend while determinizing
    */
   public RunAutomaton(Automaton a, int maxInterval, boolean tableize,
-      int maxDeterminizedStates) {
+      int determinizeWorkLimit) {
     this.maxInterval = maxInterval;
-    a = Operations.determinize(a, maxDeterminizedStates);
+    a = Operations.determinize(a, determinizeWorkLimit);
     this.automaton = a;
     points = a.getStartPoints();
     initial = 0;

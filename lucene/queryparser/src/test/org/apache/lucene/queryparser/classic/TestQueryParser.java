@@ -43,7 +43,7 @@ import java.io.IOException;
  * Tests QueryParser.
  */
 public class TestQueryParser extends QueryParserTestBase {
-  
+
   public static class QPTestParser extends QueryParser {
     public QPTestParser(String f, Analyzer a) {
       super(f, a);
@@ -115,7 +115,7 @@ public class TestQueryParser extends QueryParserTestBase {
     QueryParser qp = (QueryParser) cqpC;
     qp.setAnalyzeRangeTerms(value);
   }
-  
+
   @Override
   public void setAutoGeneratePhraseQueries(CommonQueryParserConfiguration cqpC,
       boolean value) {
@@ -257,7 +257,7 @@ public class TestQueryParser extends QueryParserTestBase {
     assertEquals(1, type[0]);
     
   }
-  
+
   public void testCustomQueryParserWildcard() {
     try {
       new QPTestParser("contents", new MockAnalyzer(random(),
@@ -267,7 +267,7 @@ public class TestQueryParser extends QueryParserTestBase {
       // expected exception
     }
   }
-  
+
   public void testCustomQueryParserFuzzy() throws Exception {
     try {
       new QPTestParser("contents", new MockAnalyzer(random(),
@@ -318,9 +318,9 @@ public class TestQueryParser extends QueryParserTestBase {
     Query unexpanded = new TermQuery(new Term("field", "dogs"));
     assertEquals(unexpanded, smart.parse("\"dogs\""));
   }
-  
+
   // TODO: fold these into QueryParserTestBase
-  
+
   /** adds synonym of "dog" for "dogs". */
   static class MockSynonymAnalyzer extends Analyzer {
     @Override
@@ -329,7 +329,7 @@ public class TestQueryParser extends QueryParserTestBase {
       return new TokenStreamComponents(tokenizer, new MockSynonymFilter(tokenizer));
     }
   }
-  
+
   /** simple synonyms test */
   public void testSynonyms() throws Exception {
     BooleanQuery.Builder expectedB = new BooleanQuery.Builder();
@@ -507,10 +507,10 @@ public class TestQueryParser extends QueryParserTestBase {
     assertEquals(expected, qp.parse("\"中国\"~3^2"));
   }
 
-  /** LUCENE-6677: make sure wildcard query respects maxDeterminizedStates. */
-  public void testWildcardMaxDeterminizedStates() throws Exception {
+  /** LUCENE-6677: make sure wildcard query respects determinizeWorkLimit. */
+  public void testWildcardDeterminizeWorkLimit() throws Exception {
     QueryParser qp = new QueryParser("field", new MockAnalyzer(random()));
-    qp.setMaxDeterminizedStates(10);
+    qp.setDeterminizeWorkLimit(1);
     try {
       qp.parse("a*aaaaaaa");
       fail("should have hit exception");

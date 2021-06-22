@@ -38,7 +38,7 @@ import org.apache.lucene.util.automaton.Automaton;
 import org.apache.lucene.util.automaton.Operations;
 import org.apache.lucene.util.automaton.Transition;
 
-import static org.apache.lucene.util.automaton.Operations.DEFAULT_MAX_DETERMINIZED_STATES;
+import static org.apache.lucene.util.automaton.Operations.DEFAULT_DETERMINIZE_WORK_LIMIT;
 
 // TODO
 //    - compare perf to PhraseQuery exact and sloppy
@@ -108,16 +108,17 @@ public class TermAutomatonQuery extends Query {
 
   /** Call this once you are done adding states/transitions. */
   public void finish() {
-    finish(DEFAULT_MAX_DETERMINIZED_STATES);
+    finish(DEFAULT_DETERMINIZE_WORK_LIMIT);
   }
 
   /**
    * Call this once you are done adding states/transitions.
-   * @param maxDeterminizedStates Maximum number of states created when
-   *   determinizing the automaton.  Higher numbers allow this operation to
-   *   consume more memory but allow more complex automatons.
+   * @param determinizeWorkLimit Maximum effort to spend determinizing the automaton. Higher numbers
+   *     allow this operation to consume more memory but allow more complex automatons. Use {@link
+   *     Operations#DEFAULT_DETERMINIZE_WORK_LIMIT} as a decent default if you don't otherwise know
+   *     what to specify.
    */
-  public void finish(int maxDeterminizedStates) {
+  public void finish(int determinizeWorkLimit) {
     Automaton automaton = builder.finish();
 
     // System.out.println("before det:\n" + automaton.toDot());
@@ -182,7 +183,7 @@ public class TermAutomatonQuery extends Query {
     }
 
     det = Operations.removeDeadStates(Operations.determinize(automaton,
-      maxDeterminizedStates));
+      determinizeWorkLimit));
   }
 
   @Override
@@ -403,7 +404,7 @@ public class TermAutomatonQuery extends Query {
         return null;
       }
     }
-    
+
     @Override
     public Explanation explain(LeafReaderContext context, int doc) throws IOException {
       // TODO
