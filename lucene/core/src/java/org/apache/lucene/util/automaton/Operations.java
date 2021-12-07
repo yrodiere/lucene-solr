@@ -61,6 +61,11 @@ final public class Operations {
    * throwing {@link TooComplexToDeterminizeException}.
    */
   public static final int DEFAULT_DETERMINIZE_WORK_LIMIT = 10000;
+  /**
+   * @deprecated Use {@link #DEFAULT_DETERMINIZE_WORK_LIMIT} instead.
+   */
+  @Deprecated
+  public static final int DEFAULT_MAX_DETERMINIZED_STATES = DEFAULT_DETERMINIZE_WORK_LIMIT;
 
   private Operations() {}
 
@@ -1196,6 +1201,15 @@ final public class Operations {
       // Automaton accepts more than one string:
       return null;
     }
+  }
+
+  /**
+   * @return common suffix, which can be an empty (length 0) BytesRef (never null)
+   * @deprecated Use {@link #getCommonSuffixBytesRef(Automaton)} instead.
+   */
+  @Deprecated
+  public static BytesRef getCommonSuffixBytesRef(Automaton a, int maxDeterminizedStates) {
+    return getCommonSuffixBytesRef( a );
   }
 
   /**
